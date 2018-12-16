@@ -15,22 +15,33 @@
     service apache2 restart
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # SSH Login Alert and checks
-    apt install mailutils
+    apt install mailutils -y 
     touch /etc/ssh/login-notify.sh
     chmod +x /etc/ssh/login-notify.sh
     cat >/etc/ssh/login-notify.sh <<EOL
-        #!/bin/sh
-        username=whoami
-        sender="me@me.com"
-        recepient="you@you.com"
+#!/bin/sh
+sender="adarwash@live.co.uk"
+recepient="ali.darwash@myport.ac.uk"
+client=$SSH_CLIENT
+if [ "$PAM_TYPE" != "close_session" ]; then
+    subject="SSH Login: $(hostname -A)"
+    # Message to send, e.g. the current environment variables.
+    message="SSH Login on $(hostname -A) @ $(date) from $(echo $PAM_RHOST)"
+    echo "$message" | mailx -r "$sender" -s "$subject" "$recepient"
+fi
 
-        if [ "$PAM_TYPE" != "close_session" ]; then
-            subject="Server Alert"
-            # Message to send, e.g. the current environment variables.
-            message="User \$(whoami) logged on to \$(hostname -A) @ \$(date)"
-            echo "$message" | mailx -r "$sender" -s "$subject" "$recepient"
-        fi
 EOL
+
+if grep -Fxq "session required pam_exec.so seteuid /etc/ssh/login-notify.sh"  /etc/pam.d/sshd
+then
+    echo "PAM EXEC Already Enabled"
+else
+   echo "session optional pam_exec.so seteuid /etc/ssh/login-notify.sh" >> /etc/pam.d/sshd
+fi
+
+
+
+
 #------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
