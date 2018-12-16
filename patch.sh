@@ -18,7 +18,26 @@
     apt install mailutils -y 
     touch /etc/ssh/login-notify.sh
     chmod +x /etc/ssh/login-notify.sh
+    while true; do
+    read -p "Do you wish to install this program? " yn
+    case $yn in
+        [Yy]* ) root='yes'; break;;
+        [Nn]* ) root='no'; break;;
+        * ) echo "Please answer yes or no.";;
+    esac
+done
+
+if [ $root = "yes" ]; then
+               echo "ENABLE"
+            else
+              echo "DISABLE"
+            fi
+
+
+            
+
     cat >/etc/ssh/login-notify.sh <<EOL
+
 #!/bin/sh
 sender="adarwash@live.co.uk"
 recepient="ali.darwash@myport.ac.uk"
